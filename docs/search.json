@@ -1,0 +1,21 @@
+{
+  "articles": [
+    {
+      "path": "about.html",
+      "title": "About this site",
+      "description": "Some additional details about the website",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n",
+      "last_modified": "2022-12-28T11:32:09-05:00"
+    },
+    {
+      "path": "index.html",
+      "title": "Kanyanee's Projects",
+      "description": "Welcome to the website. I hope you enjoy it!\n",
+      "author": [],
+      "contents": "\r\n\r\n\r\n\r\n",
+      "last_modified": "2022-12-28T11:35:41-05:00"
+    }
+  ],
+  "collections": []
+}
