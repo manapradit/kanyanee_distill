@@ -1,0 +1,487 @@
+---
+title: "Virus Test"
+description: "Knowledge Discovery and Data Mining Project"
+date: "4/20/2021"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+# Overview
+
+Data mining methods are widely used to identify patterns, rules or associations, and to predict outcomes among numbers of data. The purpose of this project is to build a pipeline for periodic analysis of employee medical data and choose the best classification technique. The employee medical data is randomly generated with 6,781 observations. The process includes merging the data, cleaning the data, processing classification technique, and generating plots. The decision tree was chosen for the final model due to its overall performance. The model is also easy to explain and compare to other classification models.
+
+# Data
+
+The employee medical data contains data from 6,781 employees in total which consists of 5,424 training data observations and 1,357 test data observations. The data are from 2 sources, A and B, which consist of 6 variables and 8 variables, respectively. All files have an ID for each employee which uniquely identifies the employee. Thus, employee ID 123 in the A file is the same employee as ID 123 in the B file.
+
+# Data cleaning and preparation
+
+This analysis utilizes the R markdown program along with multiple other R packages to do the model analysis. The following are R packages that have been used in this analysis: ggplot2 and dplyr, accompanied with a collection of R packages designed for data mining such as rpart, rpart.plot, e1071, neuralnet, and so on.
+
+```{r required libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+
+#tree
+library(rpart)
+library(rpart.plot)
+
+#Naive Bayes
+library(e1071) 
+
+#SVM
+#library(e1071)
+#library(tidyverse)
+#library(rpart)
+#library(rpart.plot)
+
+#ANN
+library(neuralnet)
+
+#K mean
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+```
+
+To clean and prepare the data for analysis, I read the dataset into R and merged the 2 source files horizontally by id and atRisk variables. Then, the data cleaning was performed to filter out observations with missing data, noises, and outliers. I excluded the missing and noisy observations due to the small number of mistakes and a concern about the uncertainty in filling in values. Each variable has a closer range to others, so there might be other mistakes, not only the missing and noisy values. After filtering data inside the acceptable values, the outliers were identified and removed if it is above the 75th or below the 25th percentile. Therefore, I decided to use only selected employees with complete data and omitted observations with missing (n=8), noisy (n=11), or outlier values (n=239), which resulted in dropping 259 observations from the training data. In addition, some data types had to be changed from numeric to categorical and adjusted for the appropriate usage.
+
+```{r read data}
+# read data into R
+dataTrainA=read.table("data/virus_test_deep_learning/dataTrainA.txt", header=TRUE)
+dataTrainB=read.table("data/virus_test_deep_learning/dataTrainB.txt", header=TRUE)
+dataTestA=read.table("data/virus_test_deep_learning/dataTestA.txt", header=TRUE)
+dataTestB=read.table("data/virus_test_deep_learning/dataTestB.txt", header=TRUE)
+
+# Merge train dataset A and B by id and atRisk
+traindata=merge(dataTrainA, dataTrainB, by=c("id","atRisk"))
+
+# Merge test dataset A and B
+testdata=merge(dataTestA, dataTestB, by=c("id","atRisk"))
+```
+
+The train data has 8 missing values, while the test data has no missing value.
+
+```{r Count all missing data}
+table(is.na(traindata))
+table(is.na(testdata))
+```
+
+```{r clean functions}
+#functions to filter noises and missing
+myCleanFunction <- function(datatoclean){
+                    datatoclean%>%filter(between(temp,90,106),
+                      between(bpSys,97,150),
+                      between(vo2,10,70),
+                      between(throat,80,120),
+                      between(atRisk,0,1),
+                      between(headA,0,9),
+                      between(bodyA,0,9),
+                      between(cough,0,1),
+                      between(runny,0,1),
+                      between(nausea,0,1),
+                      between(diarrhea,0,1)
+                    )} 
+
+#function to identify outliers
+outliers <- function(data,c){boxplot(data[,c], plot=FALSE)$out}
+```
+
+```{r exclude noises and missing values, include=FALSE}
+#library(dplyr)
+trClean=myCleanFunction(traindata)
+teClean=myCleanFunction(testdata)
+```
+
+```{r outliers, include=FALSE}
+#function to identify outliers
+outliers <- function(data,c){boxplot(data[,c], plot=FALSE)$out}
+
+out3=outliers(trClean,3)
+#sort(out3)
+out4=outliers(trClean,4)
+#sort(out4)
+out5=outliers(trClean,5)
+#sort(out5)
+out6=outliers(trClean,6)
+#sort(out6)
+
+#remove outliers from the dataset
+rmo<-trClean  #remove outliers
+rmo<- rmo[-which(rmo[,3] %in% out3),]
+rmo<- rmo[-which(rmo[,4] %in% out4),]
+rmo<- rmo[-which(rmo[,5] %in% out5),]
+rmo<- rmo[-which(rmo[,6] %in% out6),]
+
+tr=rmo
+te=teClean
+```
+
+**Train and test data after cleaning** **Train data**
+
+```{r tr data}
+summary(tr)
+```
+
+**Test data**
+
+```{r te data}
+summary(te)
+```
+
+# Exploratory Data Analysis
+
+The exploratory data analysis was performed to develop an understanding of the data, and the table below shows a glance summary of each variable. There are 5 numeric variables such as patient's temperature (temp), blood pressure (systolic) (bpSys), VO2 max (vo2), and throat culture (throat). There are 6 categorical variables including level of headache, level of body ache, cough, runny nose, nausea, diarrhea, and virus test (atRisk).
+
+Table 1: Table representing variable summary (n=5165).
+
+| Variable |  Type   |                 Median |  Mean |   SD |   Min |    Max |
+|---------:|:-------:|-----------------------:|------:|-----:|------:|-------:|
+|     temp | Numeric |                  98.16 |  98.4 | 0.91 | 96.18 | 100.63 |
+|    bpSys | Numeric |                    124 | 124.4 | 8.05 |   103 |    146 |
+|      vo2 | Numeric |                     39 | 38.04 | 5.97 |    22 |     54 |
+|   throat | Numeric |                    100 | 100.1 | 4.47 |    88 |    112 |
+|    headA | Factor  |                      3 |  3.45 | 1.07 |     0 |      8 |
+|    bodyA | Factor  |                      4 |  4.02 | 0.67 |     1 |      7 |
+|    cough | Factor  | 0 (n=3482), 1 (n=1683) |       |      |       |        |
+|    runny | Factor  | 0 (n=4141), 1 (n=1024) |       |      |       |        |
+|   nausea | Factor  | 0 (n=3924), 1 (n=1241) |       |      |       |        |
+| diarrhea | Factor  |  0 (n=4637), 1 (n=528) |       |      |       |        |
+|   atRisk | Factor  | 0 (n=2830), 1 (n=2335) |       |      |       |        |
+
+```{r Data Summary after cleaning, include=FALSE}
+summary(tr)
+summary(te)
+
+sd(tr$temp)
+sd(tr$bpSys)
+sd(tr$vo2)
+sd(tr$throat)
+sd(tr$headA)
+sd(tr$bodyA)
+```
+
+```{r count frequency in each variable, include=FALSE}
+trg=rmo
+trg %>%group_by(headA) %>%summarize(count_c = n())
+trg %>%group_by(bodyA) %>%summarize(count_c = n())
+trg %>%group_by(cough) %>%summarize(count_c = n())
+trg %>%group_by(runny) %>% summarize(count_c = n())
+trg %>%group_by(nausea) %>%summarize(count_c = n())
+trg %>%group_by(diarrhea) %>%summarize(count_c = n())
+trg %>%group_by(atRisk) %>%summarize(count_c = n())
+```
+
+## Histogram
+
+```{r, include=FALSE}
+#sources plot - <http://www.sthda.com/english/wiki/ggplot2-histogram-plot-quick-start-guide-r-software-and-data-visualization> add labels - <http://www.sthda.com/english/wiki/ggplot2-title-main-axis-and-legend-titles>
+
+md=tr
+
+md[,2]=as.factor(md[,2])
+#for (i in 7:12){md[,i] = as.factor(md[,i])}
+library(ggplot2)
+
+qplot(md[,3], geom="histogram") +ggtitle("Histogram of employee medical data")+xlab("Patient's temperature")
+#qplot(md$temp, geom="histogram")
+
+qplot(md[,4], geom="histogram") +ggtitle("Histogram of employee medical data")+xlab("Patient's temperature")
+#qplot(md$temp, geom="histogram")
+
+qplot(md[,5], geom="histogram") +ggtitle("Histogram of employee medical data")+xlab("Patient's temperature")
+# qplot(md$temp, geom="histogram")
+
+# Change histogram plot line colors by groups
+# hist1 function plot bar on top to see total
+# hist2 function plot overlaid of each group
+hist1 = function(df, var,b,title){ggplot(df, aes(x=var, color=atRisk))+
+    geom_histogram(fill="white",binwidth = b)+ 
+    theme_minimal()+
+    ggtitle(title)}
+
+hist1(md,md[,3],0.1,"Histogram of employee's temperature by virus test")+xlab("patient's temperature")
+hist1(md,md[,4],1,"Histogram of blood pressure by virus test")+xlab("blood pressure (systolic)")
+hist1(md,md[,5],1,"Histogram of VO2 max by virus test")+xlab("VO2 max")
+hist1(md,md[,6],1,"Histogram of throat culture by virus test")+xlab("throat culture")
+```
+
+```{r Overlaid histogram Function}
+hist2 = function(df, var,b){ggplot(df, aes(x=var, color=atRisk))+
+    geom_histogram(fill="white", alpha=0.5, position="identity",binwidth = b)+
+    theme_minimal()+
+    ggtitle("Histogram of employee medical data")}
+```
+
+```{r echo=FALSE,  fig.show = "hold", out.width = "50%"}
+hist2(md,md[,3],0.1)+xlab("patient's temperature")+ggtitle("Histrogram of emplyee’s temperature by virus test")
+hist2(md,md[,4],1)+xlab("blood pressure (systolic)")+ggtitle("Histrogram of  by virus test")
+hist2(md,md[,5],1)+xlab("VO2 max")+ggtitle("Histrogram of VO2 max by virus test")
+hist2(md,md[,6],1)+xlab("throat culture")+ggtitle("Histrogram of throat culture by virus test")
+hist2(md,md[,7],1)+xlab("headache")+ggtitle("Histrogram of headache by virus test")
+```
+
+## Boxplot
+
+```{r box plots, include=FALSE}
+boxplot0Function=function(dat,c,y,title){
+  boxplot(dat[,c],
+  ylab = y,
+  main = title)}
+
+boxplot0Function(tr,3,"patient's temperature", "Boxplot of patient's temperature") #removed outliers
+#boxplot0Function(trClean,3,"patient's temperature", "Boxplot of patient's temperature") #contain outliers
+boxplot0Function(tr,4,"blood pressure (systolic)", "Boxplot of blood pressure (systolic)") #removed outliers
+#boxplot0Function(trClean,4,"blood pressure (systolic)", "Boxplot of blood pressure (systolic)") #contain outliers
+boxplot0Function(tr,5,"VO2 max", "Boxplot of VO2 max")
+boxplot0Function(tr,6,"throat culture", "Boxplot of throat culture")
+```
+
+```{r Boxplot function}
+boxplotFunction=function(dat,c,var, title, x, y){
+  boxplot(dat[,c]~var, data=dat, main=title,
+          xlab=x, ylab=y)}
+```
+
+```{r Boxplot by virus test, echo=FALSE, fig.show = "hold", out.width = "50%", fig.height=7}
+boxplotFunction(tr,3,tr$atRisk,"Boxplot of patient's temperature by virus test", "virus test", "patient's temperature")
+boxplotFunction(tr,4,tr$atRisk,"Boxplot of blood pressure by virus test", "virus test", "blood pressure")
+boxplotFunction(tr,5,tr$atRisk,"Boxplot of VO2 max by virus test", "virus test", "VO2 max ")
+boxplotFunction(tr,6,tr$atRisk,"Boxplot of throat culture by virus test", "virus test", "throat culture ")
+```
+
+Overall, the distributions vary, but histograms positive and negative virus tests show that there is normal distribution for all the variables except for the patient's temperature. The histogram that displays the temperature variable is a bi-modal distribution with a higher frequency on the left distribution. The histogram of the temperature variable by the virus test illustrates that the distribution of the negative test group is skewed to the right, while the positive test group is bi-modal. This could be because some people who had the virus are symptomatic or the data was collected during the incubation period. In addition, the boxplot of throat culture for positive and negative virus tests has two similar shapes, so we can expect this variable to have an insignificant impact in this analysis.
+
+# Models
+
+The algorithms used to build the model include decision tree (CART), Naive Bayes, support vector machine (SVM), and neural networks (ANN). All were implemented in R. The simplest form for each classifier was used and parameters were set; for SVM, kernel=polynomial and for ANN, hidden=4. Each model had been divided into four steps. First, prepare the data to use in the model as different models have preferred types of data; for example, ANN model requires numeric data. Second, the model was built from the training data, followed by predicting the outcome using test data. Finally, the accuracy of each model was calculated so I could compare the models' performance.
+
+## Tree model
+
+The tree is build using this equation; atRisk\~temp+bpSys+vo2+throat+headA+bodyA+cough+runny+nausea+diarrhea
+
+```{r}
+eq=atRisk~temp+bpSys+vo2+throat+headA+bodyA+cough+runny+nausea+diarrhea #equation for models
+```
+
+```{r}
+# 1. Prepare Data
+tr_tree=tr
+te_tree=te
+
+tr_tree[,2]=as.factor(tr_tree[,2])
+for (i in 7:12){tr_tree[,i] = as.factor(tr_tree[,i])}
+
+te_tree[,2]=as.factor(te_tree[,2])
+for (i in 7:12){te_tree[,i] = as.factor(te_tree[,i])}
+
+# 2. Build Model
+# use rpart to build a decision tree model using atRisk as the class and all of the attributes except id
+t1=Sys.time()
+mod_tree=rpart(eq, data=tr_tree)
+t2=Sys.time()
+time_treel = as.double(t2-t1)
+mod_tree
+#plot the decision tree using rpart.plot
+rpart.plot(mod_tree)
+#What is one of the main determiners of voter approval?
+
+# 3. Predict
+t1=Sys.time()
+pred_tree = predict(mod_tree, te_tree[c(3,4,5,6,7,8,9,10,11,12)], type="vector")
+t2=Sys.time()
+time_treep = as.double(t2-t1)
+
+# 4. Calculate accuracy
+tab_tree = table(te_tree$atRisk,pred_tree)
+tab_tree
+
+accFunction=function(table){sum(diag(table))/sum(table)}
+#acc_tree <- sum(diag(tab1))/sum(tab1)
+acc_tree=accFunction(tab_tree)
+acc_tree
+```
+
+### Pruning the tree
+
+```{r, warning=FALSE}
+train=tr_tree
+
+#Base Model
+base_model <- rpart(eq, data = train, method = "class",
+                       control = rpart.control(cp = 0))
+#summary(base_model)
+
+#Plot Decision Tree
+plot(base_model)
+
+# Examine the complexity plot
+printcp(base_model)
+plotcp(base_model)
+rpart.plot(base_model)
+test=te_tree
+
+# Compute the accuracy of the pruned tree
+test$pred <- predict(base_model, te_tree[c(3,4,5,6,7,8,9,10,11,12)], type = "class")
+base_accuracy <- mean(test$pred == test$atRisk)
+```
+
+```{r}
+# Grow a tree with minsplit of 100 and max depth of 8
+model_preprun <- rpart(eq, data = train, method = "class", 
+                   control = rpart.control(cp = 0, maxdepth = 8,minsplit = 100))
+# Compute the accuracy of the pruned tree
+test$pred <- predict(model_preprun, te_tree[c(3,4,5,6,7,8,9,10,11,12)], type = "class")
+accuracy_preprun <- mean(test$pred == test$atRisk)
+
+rpart.plot(model_preprun)
+```
+
+```{r}
+#Postpruning
+# Prune the base_model based on the optimal cp value
+model_pruned <- prune(base_model, cp = 0.0084 )
+
+# Compute the accuracy of the pruned tree
+test$pred <- predict(model_pruned, te_tree[c(3,4,5,6,7,8,9,10,11,12)], type = "class")
+accuracy_postprun <- mean(test$pred == test$atRisk)
+data.frame(base_accuracy, accuracy_preprun, accuracy_postprun)
+
+rpart.plot(model_pruned)
+```
+
+## Naive Bayes Model
+
+```{r}
+# 1. Prepare Data
+#https://www.rdocumentation.org/packages/e1071/versions/1.7-6/topics/naiveBayes
+#library(e1071)
+tr_nb=tr
+te_nb=te
+
+tr_nb[,2]=as.factor(tr_nb[,2])
+for (i in 7:12){tr_nb[,i] = as.factor(tr_nb[,i])}
+
+te_nb[,2]=as.factor(te_nb[,2])
+for (i in 7:12){te_nb[,i] = as.factor(te_nb[,i])}
+
+# 2. Build Model
+t1=Sys.time()
+mod_nb=naiveBayes(eq,tr_nb)
+t2=Sys.time()
+time_nbl = as.double(t2-t1)
+mod_nb
+
+# 3. Predict
+t1=Sys.time()
+pred_nb = predict(mod_nb, te_nb[c(3,4,5,6,7,8,9,10,11)])
+t2=Sys.time()
+time_nbp = as.double(t2-t1)
+
+# 4. Calculate accuracy
+tab_nb=table(pred_nb,te_nb$atRisk)
+tab_nb
+
+acc_nb =accFunction(tab_nb)
+acc_nb
+```
+
+## SVM Model
+
+```{r}
+# 1. Prepare Data
+#http://uc-r.github.io/svm
+#https://www.rdocumentation.org/packages/e1071/versions/1.7-6/topics/plot.svm
+#For svm you will have to make them all numeric (integer) except the class.
+tr_svm=tr[-c(1)]
+te_svm=te[-c(1)]
+
+trainsvmdata <- as.data.frame(apply(tr_svm, 2, as.integer)) #make all numeric
+trainsvmdata[,1]=as.factor(tr_svm[,1])   #except class is a factor
+
+testsvmdata <- as.data.frame(apply(te_svm, 2, as.integer)) #make all numeric
+testsvmdata[,1]=as.factor(te_svm[,1])   #except class is a factor
+
+# 2. Build Model
+#SVM model 1 linear not working as line cannot divide between atRisk.
+t1=Sys.time()
+mod_svm1=svm(eq, data=trainsvmdata, kernel="linear")
+t2=Sys.time()
+time_svmll = as.double(t2-t1)
+mod_svm1
+
+# 3. Predict
+t1=Sys.time()
+predsvm1 = predict(mod_svm1,testsvmdata[c(2,3,4,5,6,7,8,9,10,11)])
+t2=Sys.time()
+time_svmlp = as.double(t2-t1)
+
+# 4. Calculate accuracy
+tab_svmlin=table(predsvm1,testsvmdata$atRisk)
+tab_svmlin
+acc_svm1=accFunction(tab_svmlin)
+acc_svm1
+
+# 2.2 Build Model SVM with  kernel="polynomial"
+#SVM model 2
+t1=Sys.time()
+mod_svm2=svm(eq, data=trainsvmdata, kernel="polynomial")
+t2=Sys.time()
+time_svmpl = as.double(t2-t1)
+mod_svm2
+
+# 3.2 Predict
+t1=Sys.time()
+predsvm2 = predict(mod_svm2,testsvmdata[c(2,3,4,5,6,7,8,9,10,11)])
+t2=Sys.time()
+time_svmpp = as.double(t2-t1)
+
+# 4.2 Calculate accuracy
+tab_svm2=table(predsvm2,testsvmdata$atRisk)
+tab_svm2
+acc_svm2=accFunction(tab_svm2)
+acc_svm2
+```
+
+## ANN
+
+# Model Selection
+
+After running the models in R markdown which is provided in the appendix, we obtain the following results as shown in table 2 below. ANN has the highest accuracy among these classifications at 0.862, followed by Naive Bayes, decision tree, and support vector machine (SVM) with accuracy rates of 0.849, 0.848, and 0.847, respectively. Unsurprisingly, ANN is the most accurate in this analysis because ANN is more complex than other models. This is also because this analysis set the hidden nodes equal to 4, but the accuracy decreases to almost the same as other techniques when using hidden nodes equal to 3.
+
+Then, I used learning time and predicting time to compare the model expensiveness. The learning time is the time that the model spends on training the model. The predicting time is the time that the model uses to predict the class of the test dataset. The decision tree has the least predicting time at 5.00 seconds, with second lowest learning time at 1.02 seconds. Although, Naive Bayes has the least learning time at 0.78 seconds, it has high predicting time at 16.46 seconds. Unfortunately, ANN's learning time is extremely high (32 minutes) because the high accuracy of ANN is compensated by the time that ANN spends learning the complex model.
+
+According to the small difference in accuracy and the model expensiveness, I decided to use the decision tree technique for further analysis. Even though the tree has limitations over accuracy and learning time in this test, there are advantages compared to other techniques. The decision tree model is easy to understand and interpret with simple visualization, which allows quick prediction using the condition in the tree diagram. Decision tree can handle collinearity efficiently. It is less complex than ANN and SVM but still flexible than Naive Bayes.
+
+Table 2: Table representing the model's effectiveness using training data = 5,165 and test data = 1,357
+
+|    Model    |   Accuracy | Learning Time (minute) | Predicting Time (Munite) |
+|:-----------:|-----------:|-----------------------:|-------------------------:|
+|    Tree     |     0.8482 |                0.08329 |                **0.017** |
+| Naive Bayes |    0.84893 |            **0.01296** |                  0.27427 |
+|     SVM     |    0.84746 |                1.15642 |                   0.0728 |
+|     ANN     | **0.8622** |               32.02853 |                  0.01596 |
+
+Note: Best performance in Bold
+
+# Final Model
+
+I chose decision tree for the final model because of its overall performance, and the model is easy to understand by people. In addition, pruning technique was performed to compare the tree performance of the base model, the model before pruning, and the model after pruning. The pruning process involves removing the branches that make use of features having low importance. This reduces the complexity of the tree, hence increasing its predictive power by reducing overfitting. The type of decision tree used in this analysis is Classification And Regression Tree (CART) which shows both prediction outcomes, discrete number of class and a real number of predicted outcome. The colored leaves show the probability of virus test status, and the percentage represents the number of employees in the train data that belong to the group. The bold text in black represents a condition based on which the tree splits into yes or no.
+
+The tree diagram used 3 variables for prediction including blood pressure, temperature, and headache level. The model suggested that an employee with a temperature of more than 99.1 degree Fahrenheit is very likely to have the virus. An employee is also likely to have the virus if the employee has blood pressure more than 127, temperature less than 99° Fahrenheit, and has the headache level of more than 4. Likewise, an employee with lower blood pressure and temperature with the level of headache below 4 is likely to have a negative virus test.
+
+I think that these 3 variables and conditions used in the tree diagram makes sense. First, blood pleasure is the most predictive attribute in Naive Bayes model, because other attributes have the overlap value between positive and negative virus test. This overlap could also be seen in boxplot that shows the negative and positive virus test. Second, an employee with the temperature of 99 degrees is considered to have the virus in this analysis. The statistics and the histogram above show condition is reasonable. The average temperature of this dataset is about 98 degree with standard deviation of 0.9. The frequency of employees with positive test begins to obviously increased at 99 degree, as well as the frequency for negative virus test start to fall.
+
+Figure 2: Decision tree diagram
+
+```{r}
+rpart.plot(model_pruned)
+```
+
+# Conclusion
+
+The pipeline for periodic analysis of employee medical data is built by cleaning the data, building models, predicting test data, and calculating the models' accuracy. The results show that all the models have accuracy at approximately 0.8, ANN has the extremely high leaning time, and the decision tree uses the least time for the prediction. Thus, the most effective classification technique in this analysis is a decision tree with three variables. This is because of its overall performance, simple visualization, and straightforward interpretation. Moreover, the three variable decision tree is almost as effective as those complex models with many variables. However, the results are different depending on the method used to identify outliers. This model could be helpful in primary screening employees with the risk of having the virus and preventing the virus from spreading through the workplace.
