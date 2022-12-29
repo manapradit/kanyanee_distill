@@ -1,0 +1,178 @@
+---
+title: "Web Click Prediction"
+description: |
+  Suppose you have started a new blog on Medium. Their Analytics division provides you with a traffic summary of visitors to your site. This datafile consists simply of a list of #hits per hour for the entire previous month (31 days). You would like to get a feel for the popularity of your site. Are more people reading it the longer it’s been active? Has “word of mouth” had any effect, or has interest in it begun to tail off? What kind of traffic can you expect in the future?
+date: "1/20/2022"
+output:
+  distill::distill_article:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+---
+
+Programming Project 1 Data Visualization and Analysis
+
+# 1. Pre-processing: read in and clean the data
+
+The datafile (hits.txt) comes as a comma-separated list of values: each line contains the hour of the month and the number of visits that occurred during that hour (e.g. 1,2272). There are 24x31=744 total lines. A quick glance at the file shows that some type of error has prevented the data from being measured and/or recorded at certain times, represented as a ‘nan’ (“not a number”) value in the datafile. You’re going to have to do something to deal with this problem.
+
+I read in the data using the readlines function. There are 8 'nan' ("not a number") in the number of hits variable. I decided to replace the 'nan' with its mean, approximately 1966 clicks. Then, I change the data type from text to integer to perform later calculations. I also decided to use the mean as an interger for the calculation. In addition, I made two separate lists, including the number of hours and the number of hits. This is becasue I will use these lists to calculate the regression.
+
+
+```{python}
+# Read data
+hits = open('data/project1-hits.txt')
+data = hits.readlines()
+print(data[0:20])
+```
+
+
+```{python}
+# Clean data
+# Find the mean without nan
+total_hit = 0
+count_nan = 0
+count_non_nan = 0
+for line in data:
+    line = line.strip('\n').split(',')
+    if line[1] != 'nan': # Identify the 'nan', find the sum of hits and number of non-nan to calculate the mean
+        day_hit = int(line[1])
+        total_hit += day_hit
+        count_non_nan += 1
+    else:
+        count_nan += 1
+
+mean_non_nan = total_hit/count_non_nan
+print('Mean of hits exclude nan days is ', int(mean_non_nan))
+
+# Create list of the hrs and hits
+list_data = []
+list_hrs = []
+list_hits = []        
+for line in data:
+    line = line.strip('\n').split(',')
+    if line[1] == 'nan':
+        line[1] = mean_non_nan
+    #print(line[1])
+    line[1] = int(line[1]) 
+    line[0] = int(line[0])
+    list_data.append(line)
+    list_hrs.append(line[0])
+    list_hits.append(line[1])
+     
+print('Data: ', list_data[0:10])
+print('Hrs list: ', list_hrs[0:10])
+print('Hits list: ', list_hits[0:10])    
+```
+        
+
+# 2. Visualization: display the data
+
+I use numpy to transform the data from list to array, then I use matplotlib to create a visualisation of the hour (x-axis) and the number of hits (y-axis). The visualisation shows that the visits are increasing the longer the post has been on the site. The number of visitor was steady until 400-500 hours after the blog was posted. Then, the number of visitor repidly increased since about the hour of 600 until the end of the month. 
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+array_hrs = np.array(list_hrs)
+array_hits = np.array(list_hits)
+
+plt.scatter(array_hrs,array_hits)
+plt.show()
+```
+
+# 3. Analysis and discussion: perform simple linear regression on the data
+
+The linear regression was perform by fitting a straight line to the points. The sum fuction was used to find the sum of all values X and Y. I also use for loop to go though the list and obtain the sum of the products and squares of every X and Y. The regression equation is Y =  1007.57 + 2.57 * X.
+
+```{python}
+# Obtain/calculate using least-squares method.
+sum_x = sum(list_hrs) #the sum of all X values
+sum_y = sum(list_hits) #the sum of all Y values
+
+sum_xy = 0
+sum_xsq = 0
+sum_ysq = 0
+n = 0
+for e in list_data:
+    xy = e[0]*e[1]
+    sum_xy += xy #the sum of the products of each X,Y pair
+    x_sq = e[0]**2
+    sum_xsq += x_sq #the sum of the squares of every X value
+    y_sq = e[1]**2
+    sum_ysq += y_sq #the sum of the squares of every Y value
+    n += 1
+print('The sum of all X values: ', sum_x, 
+      '\nThe sum of all Y values: ', sum_y, 
+      '\nThe sum of the products of each X,Y pair: ', sum_xy, 
+      '\nThe sum of the squares of every X value: ', sum_xsq, 
+      '\nThe sum of the squares of every Y value: ', sum_ysq, 
+      '\nThe number of data points: ', n)
+
+slope = ((n*sum_xy)-(sum_x*sum_y))/((n*sum_xsq)-(sum_x**2))
+intercept = (sum_y-(slope*sum_x))/n
+
+print('\nslope is: ', slope, '\nintercept is: ', intercept)
+
+print('\nEquation: ', 'Y = ', intercept, '+', slope, '* X')
+
+# Create a visualization of the regression analysis (i.e. plot the trendline over the scatter plot of the data). 
+val_y = []
+for e in list_data:
+    y = intercept+(slope*e[0])
+    val_y.append(y)
+    
+plt.scatter(array_hrs,array_hits, color='deepskyblue')
+plt.plot(val_y, linestyle='dashed', color='tomato', linewidth=3, label='Trend Line')
+plt.xlabel("Hours")
+plt.ylabel("Number of Hits")
+plt.rcParams["figure.figsize"] = (20,5)
+leg = plt.legend(loc='lower right')
+plt.show()
+```
+
+Assuming the regression equation accurately captures current and expected visitor behavior, how many visits would you expect at noon on the fifth day of the next month? 
+
+**Answer.** The number of visits would expect to be about 3200 hits at noon on the fifth day of the next month. So, firstly, I calculated the hour on the fifth day at noon, which is 852. Secondly, the hour number was substituted to calculate by the original equation,  Y =  1007.57 + 2.57 * X. However, the result may not be accurate because the prediction line does not seem to fit well with the higher number of hours. Looking at the scatter plot, I think the predicted number of hits for 852 hours should be higher than the result suggested by this simple regression model.
+
+```{python}
+x_of_noon_fifth_day = 744+(24*4)+12
+print('Hr at Noon on the fifth day of the next month: ', x_of_noon_fifth_day)
+
+print('\nNumber of visits expected at Noon on the fifth day of the next month \n  =', 
+      intercept, '+', slope, '*', x_of_noon_fifth_day, 
+     '\n  =', intercept+(slope*x_of_noon_fifth_day))
+```
+
+# Discussion
+
+This linear regression is very simple, easy to implement, and reduces the overfitting issues. However, the model may underfit the data because the scatter plot demonstrates exponential growth. Therefore, fitting a straight on to the data may not be appropriate in this case, this model does not seem to do well in predicting the higher the number of hour. 
+
+There are multiple suggestions for future work. First, we could normalize the number of hits during the pre-processing before performing the linear regression using squared root or log. The normalization will transform the dataset to a common scale without distorting differences in the ranges of values. Second, non-linear regression methods such as quadratic polynomial regression or exponential regression could be performed. These approaches will allow the model to better fit the data than a simple linear regression. For example below, I perform the polynomial regression, and we can see that the fitted line aligns along the scatter plot better than the simple linear regression. However, we have to be aware that these approaches could be complex to implement and could have overfitting issues. In addition, the higher level of these approaches could neglect 0, which could happen.
+
+
+```{python}
+import numpy
+import matplotlib.pyplot as plt
+
+x = np.array(list_hrs)
+y = np.array(list_hits)
+
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 4))
+
+myline = numpy.linspace(0, 744)
+
+plt.scatter(x, y, color='deepskyblue')
+plt.plot(myline, mymodel(myline), linestyle='dashed', color='Green', linewidth=4, label='Trend Line')
+plt.xlabel("Hours")
+plt.ylabel("Number of Hits")
+plt.rcParams["figure.figsize"] = (20,5)
+leg = plt.legend(loc='lower right')
+plt.show()
+
+print(mymodel)
+```
+
+
+
+
