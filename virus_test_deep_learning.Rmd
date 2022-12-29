@@ -3,11 +3,20 @@ title: "Virus Test"
 description: "Knowledge Discovery and Data Mining Project"
 date: "4/20/2021"
 output:
-  html_document:
+  distill::distill_article:
     toc: true
     toc_depth: 2
     toc_float: true
+    code_folding: code
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
 
 # Overview
 
@@ -22,8 +31,6 @@ The employee medical data contains data from 6,781 employees in total which cons
 This analysis utilizes the R markdown program along with multiple other R packages to do the model analysis. The following are R packages that have been used in this analysis: ggplot2 and dplyr, accompanied with a collection of R packages designed for data mining such as rpart, rpart.plot, e1071, neuralnet, and so on.
 
 ```{r required libraries, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
 library(dplyr)
 
 #tree
@@ -167,13 +174,13 @@ sd(tr$bodyA)
 
 ```{r count frequency in each variable, include=FALSE}
 trg=rmo
-trg %>%group_by(headA) %>%summarize(count_c = n())
-trg %>%group_by(bodyA) %>%summarize(count_c = n())
-trg %>%group_by(cough) %>%summarize(count_c = n())
-trg %>%group_by(runny) %>% summarize(count_c = n())
-trg %>%group_by(nausea) %>%summarize(count_c = n())
-trg %>%group_by(diarrhea) %>%summarize(count_c = n())
-trg %>%group_by(atRisk) %>%summarize(count_c = n())
+trg %>%group_by(headA) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(bodyA) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(cough) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(runny) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(nausea) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(diarrhea) %>%dplyr::summarize(count_c = dplyr::n())
+trg %>%group_by(atRisk) %>%dplyr::summarize(count_c = dplyr::n())
 ```
 
 ## Histogram
@@ -247,7 +254,7 @@ boxplotFunction=function(dat,c,var, title, x, y){
           xlab=x, ylab=y)}
 ```
 
-```{r Boxplot by virus test, echo=FALSE, fig.show = "hold", out.width = "50%", fig.height=7}
+```{r Boxplot by virus test, echo=FALSE, fig.show = "hold", out.width = "50%", fig.height=5}
 boxplotFunction(tr,3,tr$atRisk,"Boxplot of patient's temperature by virus test", "virus test", "patient's temperature")
 boxplotFunction(tr,4,tr$atRisk,"Boxplot of blood pressure by virus test", "virus test", "blood pressure")
 boxplotFunction(tr,5,tr$atRisk,"Boxplot of VO2 max by virus test", "virus test", "VO2 max ")
@@ -466,7 +473,9 @@ Table 2: Table representing the model's effectiveness using training data = 5,16
 |     SVM     |    0.84746 |                1.15642 |                   0.0728 |
 |     ANN     | **0.8622** |               32.02853 |                  0.01596 |
 
-Note: Best performance in Bold
+<aside>
+Note: Bold texts represent the best performance in column.
+</aside>
 
 # Final Model
 
