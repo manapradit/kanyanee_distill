@@ -1,8 +1,19 @@
 ---
-title: "Kanyanee's Projects"
+title: "Kanyanee Manapradit"
 description: |
   Welcome to the website. I hope you enjoy it!
 site: distill::distill_website
+
+image: "images/k_picture.jpg"
+links:
+  - label: LinkedIn
+    url: "https://www.linkedin.com/in/kanyanee/"
+  - label: GitHub
+    url: "https://github.com/manapradit"
+  - label: Resume
+    url: "https://drive.google.com/file/d/1sa7oRbMg3BIawSLoRCcn0oztS8lcKAF_/view?usp=sharing"
+output:
+  postcards::jolla
 ---
 
 ```{r setup, include=FALSE}
@@ -15,4 +26,3 @@ knitr::opts_chunk$set(echo = FALSE)
 # https://rstudio.github.io/distill/publish_website.html#github-pages
 
 ```
-

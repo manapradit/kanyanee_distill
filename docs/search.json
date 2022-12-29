@@ -6,15 +6,22 @@
       "description": "Some additional details about the website",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-12-29T01:01:28-05:00"
+      "last_modified": "2022-12-29T14:48:58-05:00"
+    },
+    {
+      "path": "aboutMe.html",
+      "title": "Kanyanee Manapradit",
+      "author": [],
+      "contents": "\r\n\r\n          \r\n          \r\n          \r\n          \r\n          Kanyanee\r\n          \r\n          \r\n          Home\r\n          About\r\n          Projects\r\n          \r\n          \r\n          \r\n          ☰\r\n          \r\n          \r\n      \r\n        \r\n          \r\n            Kanyanee Manapradit\r\n          \r\n          \r\n            \r\n              Raised in New Jersey by two lawyers, I am now an\r\n              aspiring data artist and competitive rock climber. I moved\r\n              to Seattle to fly floatplanes, but I got caught up in the\r\n              startup world. Send me a WhatsApp message if you have good\r\n              turnip prices.\r\n            \r\n            \r\n              Raised in New Jersey by two lawyers, I am now an\r\n              aspiring data artist and competitive rock climber. I moved\r\n              to Seattle to fly floatplanes, but I got caught up in the\r\n              startup world. Send me a WhatsApp message if you have good\r\n              turnip prices.\r\n            \r\n          \r\n\r\n          \r\n            \r\n              \r\n                  \r\n                    \r\n                      LinkedIn\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      GitHub\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      Email\r\n                    \r\n                  \r\n                \r\n                              \r\n          \r\n\r\n          \r\n            \r\n              \r\n                                \r\n                  \r\n                    LinkedIn\r\n                  \r\n                \r\n                                \r\n                  \r\n                    GitHub\r\n                  \r\n                \r\n                                \r\n                  \r\n                    Email\r\n                  \r\n                \r\n                              \r\n            \r\n          \r\n        \r\n      \r\n    \r\n\r\n    \r\n    \r\n    ",
+      "last_modified": "2022-12-29T14:48:59-05:00"
     },
     {
       "path": "index.html",
-      "title": "Kanyanee's Projects",
+      "title": "Kanyanee Manapradit",
       "description": "Welcome to the website. I hope you enjoy it!\n",
       "author": [],
-      "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-12-29T01:01:29-05:00"
+      "contents": "\r\n\r\n          \r\n          \r\n          \r\n          \r\n          Kanyanee\r\n          \r\n          \r\n          Home\r\n          About\r\n          Projects\r\n          \r\n          \r\n          \r\n          ☰\r\n          \r\n          \r\n      \r\n        \r\n          \r\n            Kanyanee Manapradit\r\n          \r\n          \r\n            \r\n              \r\n            \r\n            \r\n              \r\n            \r\n          \r\n\r\n          \r\n            \r\n              \r\n                  \r\n                    \r\n                      LinkedIn\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      GitHub\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      Resume\r\n                    \r\n                  \r\n                \r\n                              \r\n          \r\n\r\n          \r\n            \r\n              \r\n                                \r\n                  \r\n                    LinkedIn\r\n                  \r\n                \r\n                                \r\n                  \r\n                    GitHub\r\n                  \r\n                \r\n                                \r\n                  \r\n                    Resume\r\n                  \r\n                \r\n                              \r\n            \r\n          \r\n        \r\n      \r\n    \r\n\r\n    \r\n    \r\n    ",
+      "last_modified": "2022-12-29T14:49:01-05:00"
     },
     {
       "path": "projects.html",
@@ -22,7 +29,7 @@
       "description": "My Projects\n",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-12-29T01:01:30-05:00"
+      "last_modified": "2022-12-29T14:49:03-05:00"
     }
   ],
   "collections": ["projects/projects.json"]
