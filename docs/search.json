@@ -6,7 +6,7 @@
       "description": "Some additional details about the website",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-12-30T22:07:30-05:00"
+      "last_modified": "2022-12-30T22:18:01-05:00"
     },
     {
       "path": "index.html",
@@ -14,7 +14,7 @@
       "description": "Welcome to the website. I hope you enjoy it!\n",
       "author": [],
       "contents": "\r\n\r\n          \r\n          \r\n          \r\n          \r\n          Kanyanee\r\n          \r\n          \r\n          Home\r\n          Projects\r\n          \r\n          \r\n          \r\n          \r\n          \r\n          \r\n          ☰\r\n          \r\n          \r\n      \r\n        \r\n          \r\n            Kanyanee Manapradit\r\n          \r\n          \r\n            \r\n              I am a recent graduate (Dec 2022) in data science and\r\n              analytics and a data analyst living in the Ann Arbor area.\r\n              I am currently working on Power BI to help with the\r\n              data-driven decision. I like to hike mountains, and my up\r\n              coming peak is Mount Elbert, CO.\r\n            \r\n            \r\n              I am a recent graduate (Dec 2022) in data science and\r\n              analytics and a data analyst living in the Ann Arbor area.\r\n              I am currently working on Power BI to help with the\r\n              data-driven decision. I like to hike mountains, and my up\r\n              coming peak is Mount Elbert, CO.\r\n            \r\n          \r\n\r\n          \r\n            \r\n              \r\n                  \r\n                    \r\n                      LinkedIn\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      Resume\r\n                    \r\n                  \r\n                \r\n                                \r\n                  \r\n                    \r\n                      GitHub\r\n                    \r\n                  \r\n                \r\n                              \r\n          \r\n\r\n          \r\n            \r\n              \r\n                                \r\n                  \r\n                    LinkedIn\r\n                  \r\n                \r\n                                \r\n                  \r\n                    Resume\r\n                  \r\n                \r\n                                \r\n                  \r\n                    GitHub\r\n                  \r\n                \r\n                              \r\n            \r\n          \r\n        \r\n      \r\n    \r\n\r\n    \r\n    \r\n    ",
-      "last_modified": "2022-12-30T22:07:32-05:00"
+      "last_modified": "2022-12-30T22:18:02-05:00"
     },
     {
       "path": "projects.html",
@@ -22,7 +22,7 @@
       "description": "My Projects\n",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2022-12-30T22:07:33-05:00"
+      "last_modified": "2022-12-30T22:18:04-05:00"
     }
   ],
   "collections": ["projects/projects.json"]
