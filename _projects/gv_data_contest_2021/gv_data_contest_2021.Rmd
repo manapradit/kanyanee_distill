@@ -1,0 +1,21 @@
+---
+title: "GVSU Data Contest 2021"
+description: |
+  The company's performance analysis in R
+date: "5/30/2021"
+preview: gv_data_contest_2021_poster.jpg
+output:
+  distill::distill_article
+---
+The visualization below is an example focusing on customer information, services, and equipment maintenance. During the summer, I teamed up with Benjamin to participate in the GVSU annual data contest 2021 hosted by the data science society. After receiving the dataset, we communicated and planned on how to work on this large dataset. We used R to write a report and created visualizations for business decision-making. Our hard work paid off, and we won the best overall analysis from the competition. 
+
+```{r, echo=FALSE}
+knitr::include_graphics("gv_data_contest_2021_poster.jpg")
+```
+
+<br>
+<br>
+
+We also made it on a [PCEC News](https://www.gvsu.edu/pcec/module-news-view.htm?siteModuleId=10C50351-C8AB-9FB6-A8085CEAD21C2DA5&storyId=362B7EBE-BA0A-707E-D1136F17B3AA7541). 
+
+![2021 Data Contest's winners](https://www.gvsu.edu/cms4/asset/844A4F69-9185-B2FD-E4F76840F6AB4759/module/10C50351-C8AB-9FB6-A8085CEAD21C2DA5/362B7EBE-BA0A-707E-D1136F17B3AA7541[1634327731].png){width=50%}

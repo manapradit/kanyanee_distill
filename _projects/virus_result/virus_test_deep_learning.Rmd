@@ -3,6 +3,7 @@ title: "Forecast virus result using deep learning"
 description: |
   This project use R to create pipelines for periodic analysis of a medical data, using classification techniques including decision tree, naive Bayes, support vector machine, and artificial neural networks. 
 date: "4/20/2021"
+preview: img-preview.png
 output:
   distill::distill_article:
     toc: true
@@ -268,7 +269,7 @@ Overall, the distributions vary, but histograms positive and negative virus test
 
 The algorithms used to build the model include decision tree (CART), Naive Bayes, support vector machine (SVM), and neural networks (ANN). All were implemented in R. The simplest form for each classifier was used and parameters were set; for SVM, kernel=polynomial and for ANN, hidden=4. Each model had been divided into four steps. First, prepare the data to use in the model as different models have preferred types of data; for example, ANN model requires numeric data. Second, the model was built from the training data, followed by predicting the outcome using test data. Finally, the accuracy of each model was calculated so I could compare the models' performance.
 
-## Tree model
+## Tree Model
 
 The tree is build using this equation; atRisk\~temp+bpSys+vo2+throat+headA+bodyA+cough+runny+nausea+diarrhea
 
@@ -455,7 +456,44 @@ acc_svm2=accFunction(tab_svm2)
 acc_svm2
 ```
 
-## ANN
+## ANN Model
+```{r}
+# 1. Prepare Data
+tr_ann=tr[-c(1)]
+te_ann=te[-c(1)]
+
+tr_ann <- as.data.frame(apply(tr_ann, 2, as.integer)) #make all numeric
+te_ann <- as.data.frame(apply(te_ann, 2, as.integer)) #make all numeric
+
+summary(tr_ann)
+```
+
+```{r}
+# 2. Build Model
+set.seed(1)
+t1=Sys.time()
+mod_ann=neuralnet(formula = eq, data = tr_ann, hidden = 4,  threshold = 0.1, stepmax = 1e+06)
+t2=Sys.time()
+time_annl1 = as.double(t2-t1)
+```
+
+```{r}
+plot(mod_ann)
+```
+
+```{r}
+# 3. Predict
+t1=Sys.time()
+pred_ann=neuralnet::compute(mod_ann,te_ann[c(2,3,4,5,6,7,8,9,10,11)])
+t2=Sys.time()
+time_annp1 = as.double(t2-t1)
+
+# 4. Calculate accuracy
+table(pred_ann$net.result >0.5, te_ann$atRisk)
+tab_ann=table(pred_ann$net.result >0.5, te_ann$atRisk)
+acc_ann <- sum(diag(tab_ann))/sum(tab_ann)
+acc_ann
+```
 
 # Model Selection
 
@@ -477,6 +515,32 @@ Table 2: Table representing the model's effectiveness using training data = 5,16
 <aside>
 Note: Bold texts represent the best performance in column.
 </aside>
+
+**Moddel comparison**
+```{r}
+# Model Accuracy
+acc_tree
+acc_nb
+acc_svm2
+acc_ann
+```
+
+```{r}
+# Learning Time
+time_treel
+time_nbl
+time_svmpl
+time_annl1
+```
+
+```{r}
+# Predicting Time
+time_treep
+time_nbp
+time_svmpp
+time_annp1
+```
+
 
 # Final Model
 

@@ -3,6 +3,7 @@ title: "Diamonds Price Prediction"
 description: |
   Diamonds take billions of years to form and not all of them survive the long journey. This project aims to estimate the effects on diamond prices. We run regressions using the diamonds dataset, consisting of 53,940 round diamonds and ten variables. The final model use carat, color, and clarity as variables to estimate their causality on diamond price. The model goodness of fit is evaluated by R-Squared of 0.903.
 date: "12/10/2021"
+preview: img-preview.png
 output:
   distill::distill_article:
     toc: true

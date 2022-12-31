@@ -8,10 +8,10 @@ image: "images/k_picture.jpg"
 links:
   - label: LinkedIn
     url: "https://www.linkedin.com/in/kanyanee/"
-  - label: GitHub
-    url: "https://github.com/manapradit"
   - label: Resume
     url: "https://drive.google.com/file/d/1sa7oRbMg3BIawSLoRCcn0oztS8lcKAF_/view?usp=sharing"
+  - label: GitHub
+    url: "https://github.com/manapradit"
 output:
   postcards::jolla
 ---
@@ -26,3 +26,5 @@ knitr::opts_chunk$set(echo = FALSE)
 # https://rstudio.github.io/distill/publish_website.html#github-pages
 
 ```
+
+I am a recent graduate (Dec 2022) in data science and analytics and a data analyst living in the Ann Arbor area. I am currently working on Power BI to help with the data-driven decision. I like to hike mountains, and my up coming peak is Mount Elbert, CO. 
